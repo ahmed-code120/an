@@ -1,0 +1,94 @@
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-serif: "Space Grotesk", sans-serif; /* fallback */
+  
+  --color-brand-dark: #060608;
+  --color-brand-light: #F0ECE4;
+  --color-brand-red: #FF2B45;
+  --color-brand-gold: #FFB347;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-brand-dark);
+    color: var(--color-brand-light);
+    margin: 0;
+    padding: 0;
+    overscroll-behavior: none;
+    cursor: none;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9997;
+    opacity: 0.4;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .glitch-effect {
+    position: relative;
+    display: inline-block;
+    --g-intensity: 0;
+    /* User can pass --g-offset directly from React based on scroll */
+    transform: translate(calc(var(--g-offset-x, 0) * 1px), calc(var(--g-offset-y, 0) * 1px)) skew(calc(var(--g-skew, 0) * 1deg));
+  }
+  .glitch-effect::before,
+  .glitch-effect::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    opacity: calc(var(--g-intensity) * 0.9 + 0.1);
+  }
+  .glitch-effect::before {
+    left: calc(var(--g-intensity) * 5px + 2px);
+    text-shadow: -2px 0 var(--color-brand-red), 2px 0px rgba(0,255,255,0.5);
+    clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+    transform: translateX(calc(var(--g-intensity) * -8px));
+  }
+  .glitch-effect::after {
+    left: calc(var(--g-intensity) * -5px - 2px);
+    text-shadow: 2px 0 #00ffff, -2px 0px rgba(255,43,69,0.5);
+    clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+    transform: translateX(calc(var(--g-intensity) * 8px));
+  }
+  
+  /* We use an animation for spontaneous small glitches, controlled by intensity */
+  .glitch-effect.animate-glitch::before { animation: glitch1 calc(max(0.1s, 3s - var(--g-intensity) * 2.5s)) infinite linear alternate-reverse; }
+  .glitch-effect.animate-glitch::after { animation: glitch2 calc(max(0.1s, 2.5s - var(--g-intensity) * 2s)) infinite linear alternate-reverse; }
+}
+
+@keyframes glitch1 {
+  0%,90%,100% { clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); transform: translateX(0) skew(0deg); }
+  92% { clip-path: polygon(0 15%, 100% 15%, 100% 45%, 0 45%); transform: translateX(calc(-3px - (var(--g-intensity) * 15px))) skew(calc(var(--g-intensity) * 20deg)); }
+  94% { clip-path: polygon(0 10%, 100% 10%, 100% 50%, 0 50%); transform: translateX(calc(3px + (var(--g-intensity) * 15px))) skew(calc(var(--g-intensity) * -20deg)); filter: hue-rotate(90deg); }
+  96% { clip-path: polygon(0 30%, 100% 30%, 100% 70%, 0 70%); transform: translateX(calc(-2px - (var(--g-intensity) * 10px))) skew(0deg); }
+}
+@keyframes glitch2 {
+  0%,85%,100% { clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); transform: translateX(0) skew(0deg); }
+  88% { clip-path: polygon(0 55%, 100% 55%, 100% 85%, 0 85%); transform: translateX(calc(4px + (var(--g-intensity) * 15px))) skew(calc(var(--g-intensity) * -15deg)); }
+  91% { clip-path: polygon(0 45%, 100% 45%, 100% 75%, 0 75%); transform: translateX(calc(-4px - (var(--g-intensity) * 15px))) skew(calc(var(--g-intensity) * 15deg)); filter: blur(2px); }
+  94% { clip-path: polygon(0 65%, 100% 65%, 100% 75%, 0 75%); transform: translateX(calc(2px + (var(--g-intensity) * 10px))) skew(0deg); filter: blur(0px); }
+}
+
